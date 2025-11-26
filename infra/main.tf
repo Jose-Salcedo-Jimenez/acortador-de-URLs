@@ -82,7 +82,7 @@ resource "aws_iam_role_policy_attachment" "lambda_attach" {
 #Variable para el nombre de la tabla
 variable "dynamo_table_name"{
   description = "El nombre de la Tabla"
-  default = "url-shortener-map"
+  default = "Tabla1"
 }
 
 # 1. Empaquetado del Código

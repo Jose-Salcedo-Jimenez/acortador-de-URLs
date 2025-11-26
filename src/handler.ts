@@ -17,11 +17,9 @@ const generate = (): string => {
 };
 
 export const handler: APIGatewayProxyHandler = async (event) => {
-  console.log("Evento recibido:", JSON.stringify(event, null, 2)); 
+ let parsedBody = JSON.parse(event.body as string);
 
-  const body = event as unknown as { url: string };
-
-  const logURl: string = body.url;
+  const logURl: string = parsedBody.url;
 
   if (!logURl) {
     return {
