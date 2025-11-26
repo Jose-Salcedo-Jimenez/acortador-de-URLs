@@ -119,6 +119,7 @@ resource "aws_apigatewayv2_api" "http_api" {
   protocol_type = "HTTP"
 }
 
+
 # Integración de Lambda con API Gateway
 resource "aws_apigatewayv2_integration" "shorten_lambda_integration" {
   api_id             = aws_apigatewayv2_api.http_api.id
