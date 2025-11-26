@@ -23,21 +23,12 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
   const logURl: string = body.url;
 
-  if (!logURl || typeof logURl !== "string") {
+  if (!logURl) {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: "Missing or invalid url" }),
     };
   }
-
-
-  if (!logURl || typeof logURl !== "string") {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ message: "Missig or invalid url" }),
-    };
-  }
-
   //Logica de Acortamiento
   const shortID = generate();
   const shortUrl = `${Base_Url}/${shortID}`;
