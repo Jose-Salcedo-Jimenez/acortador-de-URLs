@@ -17,11 +17,9 @@ const generate = (): string => {
 };
 
 export const handler: APIGatewayProxyHandler = async (event) => {
-  console.log("Evento recibido:", JSON.stringify(event, null, 2)); // 🚨 CORRECCIÓN CLAVE: Asumimos que el JSON está en la raíz del evento. // Usaremos el objeto 'event' como si fuera el cuerpo (body) que necesitamos.
+  console.log("Evento recibido:", JSON.stringify(event, null, 2)); 
 
   const body = event as unknown as { url: string };
-
-  // Ya no necesitamos JSON.parse() ni chequear event.body
 
   const logURl: string = body.url;
 
