@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-"build": "esbuild src/handler.ts --bundle --platform=node --target=node20 --outdir=dist"  },
+    "build:shorten": "esbuild src/handler.ts --bundle --platform=node --target=node20 --outdir=dist",
+    "build:redirect": "esbuild src/redirect_handler.ts --bundle --platform=node --target=node20 --minify --outfile=dist/redirect_handler.js",
+    "build": "npm run build:shorten && npm run build:redirect"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

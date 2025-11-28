@@ -92,7 +92,7 @@ data "archive_file" "lambda_zip"{
   output_path = "lambda_package.zip"
 }
 
-# 2. Definición de la Función Lambda
+# 2. Definición de la Función Lambda con el method Post
 resource "aws_lambda_function" "shorten_url_lambda" {
   function_name    = "UrlShortenerFunction"
   handler          = "handler.handler" # archivo.export
@@ -113,10 +113,18 @@ resource "aws_lambda_function" "shorten_url_lambda" {
   }
 }
 
-# Creación del API Gateway (HTTP API es más simple y barato)
+# Creación del API Gateway 
 resource "aws_apigatewayv2_api" "http_api" {
   name          = "UrlShortenerAPI"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_origins = ["*"] 
+    
+    allow_methods = ["POST", "GET", "OPTIONS"] 
+    
+    allow_headers = ["*"] 
+    }
 }
 
 
@@ -151,4 +159,25 @@ resource "aws_lambda_permission" "apigw_lambda_permission" {
   function_name = aws_lambda_function.shorten_url_lambda.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*"
+}
+
+#Definimos la lambda con method GET
+resource "aws_lambda_function" "surl_redirect_lambda" {
+  function_name    = "UrlRedirectFunction"
+  handler          = "redirect_handler.handler" # archivo.export
+  runtime          = "nodejs20.x"
+  role             = aws_iam_role.lambda_exec_role.arn
+  timeout          = 10
+  
+  # Código de la función (empaquetado)
+  filename         = data.archive_file.lambda_zip.output_path
+  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+
+  # Variables de Entorno
+  environment {
+    variables = {
+      DYNAMODB_TABLE_NAME = var.dynamo_table_name
+      BASE_URL            = "https://${aws_apigatewayv2_api.http_api.api_endpoint}" # Se actualiza con el endpoint
+    }
+  }
 }
