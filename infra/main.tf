@@ -108,7 +108,7 @@ resource "aws_lambda_function" "shorten_url_lambda" {
   environment {
     variables = {
       DYNAMODB_TABLE_NAME = var.dynamo_table_name
-      BASE_URL            = "https://${aws_apigatewayv2_api.http_api.api_endpoint}" # Se actualiza con el endpoint
+      BASE_URL            = "${aws_apigatewayv2_api.http_api.api_endpoint}" # Se actualiza con el endpoint
     }
   }
 }
