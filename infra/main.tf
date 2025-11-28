@@ -85,20 +85,11 @@ variable "dynamo_table_name"{
   default = "Tabla1"
 }
 
-# 1. Empaquetado del Código (Para el Handler POST)
-data "archive_file" "shorten_lambda_zip" {
-  type        = "zip"
-  # Apunta al archivo JS compilado por el build:shorten
-  source_file = "../dist/handler.js" 
-  output_path = "shorten_lambda_package.zip"
-}
-
-# 1. Empaquetado del Código (Para el Handler GET)
-data "archive_file" "redirect_lambda_zip" {
-  type        = "zip"
-  # Apunta al archivo JS compilado por el build:redirect
-  source_file = "../dist/redirect_handler.js" 
-  output_path = "redirect_lambda_package.zip"
+# 1. Empaquetado del Código
+data "archive_file" "lambda_zip"{
+  type = "zip"
+  source_dir = "../dist"
+  output_path = "lambda_package.zip"
 }
 
 # 2. Definición de la Función Lambda con el method Post
