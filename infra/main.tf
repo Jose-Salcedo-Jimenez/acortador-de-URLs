@@ -85,11 +85,20 @@ variable "dynamo_table_name"{
   default = "Tabla1"
 }
 
-# 1. Empaquetado del Código
-data "archive_file" "lambda_zip"{
-  type = "zip"
-  source_dir = "../dist"
-  output_path = "lambda_package.zip"
+# 1. Empaquetado del Código (Para el Handler POST)
+data "archive_file" "shorten_lambda_zip" {
+  type        = "zip"
+  # Apunta al archivo JS compilado por el build:shorten
+  source_file = "../dist/handler.js" 
+  output_path = "shorten_lambda_package.zip"
+}
+
+# 1. Empaquetado del Código (Para el Handler GET)
+data "archive_file" "redirect_lambda_zip" {
+  type        = "zip"
+  # Apunta al archivo JS compilado por el build:redirect
+  source_file = "../dist/redirect_handler.js" 
+  output_path = "redirect_lambda_package.zip"
 }
 
 # 2. Definición de la Función Lambda con el method Post
@@ -180,4 +189,32 @@ resource "aws_lambda_function" "surl_redirect_lambda" {
       BASE_URL            = "https://${aws_apigatewayv2_api.http_api.api_endpoint}" # Se actualiza con el endpoint
     }
   }
+}
+
+
+# 1. Permiso para que API Gateway invoque la Lambda de Redirección
+resource "aws_lambda_permission" "redirect_apigw_permission" {
+  statement_id  = "AllowExecutionFromAPIGatewayRedirect"
+  action        = "lambda:InvokeFunction"
+  # Apunta a la nueva función Lambda de redirección
+  function_name = aws_lambda_function.surl_redirect_lambda.function_name 
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*" 
+}
+
+# 2. Integración de la Lambda de Redirección con API Gateway
+resource "aws_apigatewayv2_integration" "redirect_lambda_integration" {
+  api_id             = aws_apigatewayv2_api.http_api.id
+  integration_type   = "AWS_PROXY"
+  integration_method = "POST" 
+  # Apunta al ARN de invocación de la nueva Lambda
+  integration_uri    = aws_lambda_function.surl_redirect_lambda.invoke_arn 
+  payload_format_version = "2.0"
+}
+
+# 3. Definición de la Ruta: GET /{short_id}
+resource "aws_apigatewayv2_route" "redirect_route" {
+  api_id    = aws_apigatewayv2_api.http_api.id
+  route_key = "GET /{short_id}" 
+  target    = "integrations/${aws_apigatewayv2_integration.redirect_lambda_integration.id}"
 }
